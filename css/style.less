@@ -1,0 +1,77 @@
+/*
+ * Jot - A quick note writing and sharing app.
+ * style.less - All custom styles. Requires less.js. 
+ * 
+ * Author: Alf http://alfg.co
+ *
+ * Licensed under the MIT License:
+ *   http://www.opensource.org/licenses/mit-license.php
+ */
+
+/*
+ * Variables */
+@white: #fff;
+@light-gray: #eee;
+@gray: #646464;
+@red: #FF4949;
+
+@font1: 'Kotta One', serif;
+
+.rounded-corners (@radius: 5px) {
+    -webkit-border-radius: @radius;
+    -moz-border-radius: @radius;
+    -ms-border-radius: @radius;
+    -o-border-radius: @radius;
+    border-radius: @radius;
+}
+.shadow {
+    box-shadow: 0 0 0 0;
+}
+
+html, body {
+    font-family: @font1;
+    color: @gray;
+    height: 100%;
+    overflow: hidden;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: @font1;
+}
+
+#controls {
+    position: absolute;
+    width: 280px;
+    padding: 20px;
+}
+#share {
+}
+
+.alert {
+    color: @red;
+}
+
+#write-content {
+    color: @gray;
+    width: 800px;
+    height: 100%;
+    margin: 0 auto; 
+    position: relative;
+    top: 20px;
+    background: @light-gray;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+#write-text {
+    color: @gray;
+    width: 100%;
+    height: 100%;
+    font-family: @font1;
+    font-size: 1.4em;
+    background: transparent;
+    border: 0;
+    resize: none;
+    outline: none;
+    box-shadow: none;
+}
