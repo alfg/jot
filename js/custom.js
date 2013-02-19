@@ -9,6 +9,8 @@
  */
 
 $(document).ready(function() {
+    // Autosize textarea
+    $('#write-text').autosize();
 
     // Decode and load data if hash url exists
     if (location.hash != '') {
