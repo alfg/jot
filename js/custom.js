@@ -18,6 +18,7 @@ $(document).ready(function() {
        $('#write-text').val(Base64.decode(getHash));
        $('#share-url').val(location.href);
        $('#share').show();
+       $('#write-text').trigger('autosize');
     }
 
     // Add encoded hash to url on save button
