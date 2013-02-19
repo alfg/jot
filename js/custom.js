@@ -15,7 +15,8 @@ $(document).ready(function() {
     // Decode and load data if hash url exists
     if (location.hash != '') {
        var getHash = location.hash.substr(1);
-       $('#write-text').val($.base64.decode(getHash));
+       $('#write-text').val(Base64.decode(getHash));
+       $('#share-url').val(location.href);
        $('#share').show();
     }
 
@@ -28,7 +29,7 @@ $(document).ready(function() {
             e.preventDefault();
         }
         else {
-            var encoded = $.base64.encode(text);
+            var encoded = Base64.encode(text);
             location.hash = encoded;
             $('#share-url').val(location.href);
             $('#share').slideDown('fast');
@@ -40,5 +41,18 @@ $(document).ready(function() {
         location.hash = '';
         $('#share').slideUp('fast');
         $('#write-text').val('');
+    });
+});
+
+// Select all text on #share-url focus
+$("#share-url").focus(function() {
+    var $this = $(this);
+    $this.select();
+
+    // Work around Chrome's little problem
+    $this.mouseup(function() {
+        // Prevent further mouseup intervention
+        $this.unbind("mouseup");
+        return false;
     });
 });
