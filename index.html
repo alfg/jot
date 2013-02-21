@@ -5,8 +5,8 @@
     <meta charset="utf-8">
     <title>Jot - Simple note-taking and sharing</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="">
-    <meta name="author" content="">
+    <meta name="description" content="Distraction-free, note-taking with sharing and encryption capabilities">
+    <meta name="author" content="Alf alfg.co">
 
     <link href='http://fonts.googleapis.com/css?family=Kotta+One' rel='stylesheet' type='text/css'>
     <link href="css/base.css" type="text/css" rel="stylesheet" />
@@ -18,20 +18,34 @@
   <body>
   <div class="container">
       <div id="controls" class="six columns">
+          <button id="decrypt-button" style="display: none;">Decrypt</button>
           <button id="save-button">Save</button>
           <button id="clear-button">Clear</button>
-          <span class="alert"></span>
+          <button id="add-key-button">Add Key (optional)</button>
+          <br />
+          <div class="alert"></div>
+
+          <div id="key" style="display: none;">
+              <h6>Add a key</h6>
+              <input id="key-gen" type="text" value=""></input>
+          </div>
+          <div id="key-required" style="display: none;">
+              <h6 class="alert">Key required to decrypt</h6>
+              <input id="key-decrypt" type="text" value=""></input>
+          </div>
           <div id="share" style="display: none;">
               <h6>Share your jot</h6>
               <input id="share-url" type="text" value=""></input>
           </div>
-          <p><strong>Jot</strong> is a simple, distraction-free, note-taking app with sharing and saving capabilities.</p>
-          <p>Jot does not store any information. All inputted data is encoded into a
-            <a href="http://en.wikipedia.org/wiki/Hash_function">hash</a> within the URL
-          and is decoded upon loading the shared URL.</p> 
-          <p>Jot is open-source under the <a href="http://opensource.org/licenses/MIT">MIT License</a>. Feel free to view or fork
+
+          <p><strong>Jot</strong> is a simple, distraction-free, note-taking app with sharing, saving and encryption features.</p>
+          <p>Jot does not store any information. The message is either <a href="http://en.wikipedia.org/wiki/Base64">encoded</a>
+            or <a href="http://en.wikipedia.org/wiki/Blowfish_(cipher)">encrypted</a> (if using a key) within the URL hash
+          and is decoded upon loading the shared URL or decrypted upon providing the key.</p> 
+          <p>Jot is open-sourced under the <a href="http://opensource.org/licenses/MIT">MIT License</a>. View, fork, or contribute to
             the project on <a href="http://github.com/alfg/jot">Github</a>.</p>
           <p>Created by <a href="http://alfg.co">Alf</a> on a bored weekend night.</p>
+
       </div>
       <div id="write-content" class="ten columns">
           <textarea id="write-text" placeholder="Jot something down..."></textarea>
@@ -40,6 +54,7 @@
   </body>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     <script src="js/base64-1.7.js" type="text/javascript"></script>
+    <script src="js/blowfish.js" type="text/javascript"></script>
     <script src="js/jquery.autosize-min.js" type="text/javascript"></script>
     <script src="js/custom.js" type="text/javascript"></script>
 </html>
