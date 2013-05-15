@@ -65,7 +65,7 @@ $(document).ready(function () {
             var encrypted = bf.encrypt(text);
 
             // Load blowfish cipher into url path and show share input
-            location.hash = 'b' + encrypted;
+            location.hash = 'b' + hexToBase64(encrypted);
             $('#share-url').val(location.href);
             $('#share').slideDown('fast');
 
@@ -100,7 +100,8 @@ $(document).ready(function () {
         var getHash = location.hash.substr(2); // Gets hash value after 2nd char
         var key = $('#key-decrypt').val(); // Grabs inputted key
         var bf = new Blowfish(key); // Run blowfish against key
-        var decrypted = bf.decrypt(getHash); // Decrypted message (if key is correct)
+        var decrypted = bf.decrypt(base64ToHex(getHash)); // Decrypted message (if key is correct)
+
         $('#write-text').val(decrypted); // Output to write-text
         $('#write-text').trigger('autosize'); // Dynamically sizes the textarea
     });
@@ -120,3 +121,4 @@ $("#share-url").focus(function () {
         return false;
     });
 });
+
