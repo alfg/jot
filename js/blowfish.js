@@ -1,101 +1,251 @@
-/*
- JavaScript encryption module ver. 2.0 by Daniel Rench
- 
- Based on existing code:
- Copyright (c) 2003 by Andre Mueller.
- Init of blowfish constants with a function (init/backup errors)
- Copyright (c) 2003 by Rainer Wollmann
- This Object is open source. You can redistribute it and/or modify
- it under the terms of the Universal General Public License (UGPL).
- http://www.ugpl.de/
-*/
-function Blowfish(k){
-	if (k.length==0) throw "0 length key";
-	this.bf_P=this.Fbf_P();
-	this.bf_S0=this.Fbf_S0();
-	this.bf_S1=this.Fbf_S1();
-	this.bf_S2=this.Fbf_S2();
-	this.bf_S3=this.Fbf_S3();
-	this.escape=function(t){
-		var r='';
-		for(var i=0,l=t.length;i<l;i++){
-			var c=t.charCodeAt(i);
-			var t1=Math.floor(c/16);
-			var t2=c%16;
-			if (t1<10) t1+=48;
-			else t1+=55;
-			if (t2<10) t2+=48;
-			else t2+=55;
-			r+=String.fromCharCode(t1)+String.fromCharCode(t2);
+/**
+ * blowfish.js
+ * JavaScript Blowfish Library
+ *
+ * The MIT License
+ *
+ * Copyright (c) 2011 Takehito Gondo
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
+function Blowfish(config) {
+	this.config = config;
+	if (typeof(config) == "string") {
+		this.config = { key: config };
+	}
+	this.init([
+		this.P=Blowfish.prototype.P(this.config.key),
+		this.SBOX1=Blowfish.prototype.SBOX1(),
+		this.SBOX2=Blowfish.prototype.SBOX2(),
+		this.SBOX3=Blowfish.prototype.SBOX3(),
+		this.SBOX4=Blowfish.prototype.SBOX4()
+	]);
+};
+Blowfish.prototype.init=function(o){
+	var t = {l:0, r:0};
+	for (var i=0; i<o.length; ++i) {
+		for (var j=0,len=o[i].length; j<len; j+=2) {
+			t = this.encipher(t.l, t.r);
+			o[i][j] = t.l;
+			o[i][j+1] = t.r;
 		}
-		return r;
-	};
-	this.wordbyte0=function(w){return Math.floor(Math.floor(Math.floor(w/256)/256)/256)%256};
-	this.wordbyte1=function(w){return Math.floor(Math.floor(w/256)/256)%256};
-	this.wordbyte2=function(w){return Math.floor(w/256)%256};
-	this.wordbyte3=function(w){return w%256};
-	this.xor=function(w1,w2){var r=w1^w2;if (r<0) r=0xffffffff+1+r; return r};
-	this.key=(k.length>56)?k.substr(0,56):k;
-	var j=0;
-	for(var i=0;i<18;++i){
-		var d=((this.key.charCodeAt(j%this.key.length)*256+this.key.charCodeAt((j+1)%this.key.length))*256+this.key.charCodeAt((j+2)%this.key.length))*256+this.key.charCodeAt((j+3)%this.key.length);
-		this.bf_P[i]=this.xor(this.bf_P[i],d);
-		j=(j+4)%this.key.length;
 	}
-	this.key=this.escape(this.key);
-	this.xl_par=0x00000000;
-	this.xr_par=0x00000000;
-	for(var i=0;i<18;i+=2){
-		this.encipher();
-		this.bf_P[i]=this.xl_par;
-		this.bf_P[i+1]=this.xr_par;
-	}
-	for(j=0;j<256;j+=2){
-		this.encipher();
-		this.bf_S0[j]=this.xl_par;
-		this.bf_S0[j+1]=this.xr_par;
-	}
-	for(j=0;j<256;j+=2){
-		this.encipher();
-		this.bf_S1[j]=this.xl_par;
-		this.bf_S1[j+1]=this.xr_par;
-	}
-	for(j=0;j<256;j+=2){
-		this.encipher();
-		this.bf_S2[j]=this.xl_par;
-		this.bf_S2[j+1]=this.xr_par;
-	}
-	for (j=0;j<256;j+=2){
-		this.encipher();
-		this.bf_S3[j]=this.xl_par;
-		this.bf_S3[j+1]=this.xr_par;
-	}
-	this.unescape=function(t){
-		var r='';
-		for(i=0,l=t.length;i<l;i++){
-			var t1=t.charCodeAt(i++);
-			var t2=t.charCodeAt(i);
-			if (t1<58) t1-=48;
-			else {
-				if (t1>96) t1-=87;
-				else t1-=55;
-			}
-			if (t2<58) t2-=48;
-			else {
-				if (t2>96) t2-=87;
-				else t2-=55;
-			}
-			r+=String.fromCharCode(t1*16+t2);
+};
+Blowfish.prototype.JSONInit=function(o) {
+	o = JSON.parse(o);
+	this.P = o.P;
+	this.SBOX1 = o.SBOX1;
+	this.SBOX2 = o.SBOX2;
+	this.SBOX3 = o.SBOX3;
+	this.SBOX4 = o.SBOX4;
+};
+Blowfish.prototype.encrypt=function(t) {
+	var bf = this;
+	return this._encrypt(t, {
+		f: [],
+		push: function(l,r){
+			this.f.push(bf.fromStringCode32(l));
+			this.f.push(bf.fromStringCode32(r));
+		},
+		get: function(){
+			return this.f.join('');
 		}
-		return r;
+	});
+};
+Blowfish.prototype.encrypt64=function(t){
+	return this._encrypt(t, {
+		f: [],
+		stack: [],
+		map64: function(b){
+			if (b==62) return '+';
+			else if (b==63) return '/';
+			else if (b>=52) return String.fromCharCode(b-4); // 0-9
+			else if (b>=26) return String.fromCharCode(b+71); // a-z
+			else return String.fromCharCode(b+65); // A-Z
+		},
+		extract32: function(i32) {
+			return [
+				i32>>30 & 0x03, i32>>28 & 0x03, i32>>26 & 0x03, i32>>24 & 0x03,
+				i32>>22 & 0x03, i32>>20 & 0x03, i32>>18 & 0x03, i32>>16 & 0x03,
+				i32>>14 & 0x03, i32>>12 & 0x03, i32>>10 & 0x03, i32>> 8 & 0x03,
+				i32>> 6 & 0x03, i32>> 4 & 0x03, i32>> 2 & 0x03, i32>> 0 & 0x03
+			];
+		},
+		push: function(l,r){
+			this.stack = this.stack.concat(this.extract32(l), this.extract32(r));
+			while (this.stack.length >= 3) {
+				this.f.push(this.map64(this.stack.shift()<<4 | this.stack.shift()<<2 | this.stack.shift()));
+			}
+		},
+		get: function() {
+			if (this.stack.length) {
+				for (var i=3-this.stack.length; i>0; --i) this.stack.push(0);
+				this.f.push(this.map64(this.stack.shift()<<4 | this.stack.shift()<<2 | this.stack.shift()));
+			}
+			return this.f.join('');
+		}
+	});
+};
+Blowfish.prototype._encrypt=function(t,o){
+	var tl,tr,e;
+	if (this.config.verification) {
+		for (var i=0; i<this.config.verification.length; i+=8) {
+			tl = this.stringCode32(this.config.verification.substr(i, 4));
+			tr = this.stringCode32(this.config.verification.substr(i+4, 4));
+			e = this.encipher(tl,tr);
+			o.push(e.l, e.r);
+		}
+	}
+	for (var i=0; i<t.length+4; i+=8) {
+		tl = this.stringCode32(t.substr(i, 4));
+		tr = this.stringCode32(t.substr(i+4, 4));
+		e = this.encipher(tl,tr);
+		o.push(e.l, e.r);
+	}
+	return o.get();
+};
+Blowfish.prototype.decrypt=function(t) {
+	var tl,tr;
+	var o = this._decrypt();
+	for (var i=0; i<t.length; i+=8) {
+		tl = this.stringCode32(t.substr(i, 4));
+		tr = this.stringCode32(t.substr(i+4, 4));
+		o.push(tl,tr);
+	}
+	return o.get();
+};
+Blowfish.prototype.decrypt64=function(t){
+	var stack=[];
+	var o = this._decrypt();
+	function map64(b) {
+		if (b==47) return 63; // "/"
+		else if (b==43) return 62; // "+"
+		else if (b>=97) return b-71; // a-z
+		else if (b>=65) return b-65; // A-Z
+		else return b+4; // 0-9
+	}
+	function compact32() {
+		return (
+			(stack.shift()<<6 | stack.shift()<<4 | stack.shift()<<2 | stack.shift())<<24 |
+			(stack.shift()<<6 | stack.shift()<<4 | stack.shift()<<2 | stack.shift())<<16 |
+			(stack.shift()<<6 | stack.shift()<<4 | stack.shift()<<2 | stack.shift())<< 8 |
+			(stack.shift()<<6 | stack.shift()<<4 | stack.shift()<<2 | stack.shift())<< 0
+		);
+	}
+	for (var i=0; i<t.length; ++i) {
+		var c = map64(t.charCodeAt(i));
+		stack = stack.concat([ c>>4 & 0x03, c>>2 & 0x03, c>>0 & 0x03 ]);
+		if (stack.length >= 32) {
+			o.push(compact32(), compact32());
+		}
+	}
+	return o.get();
+};
+Blowfish.prototype._decrypt=function(){
+	var bf = this;
+	return {
+		f: [],
+		push: function(l,r){
+			var e = bf.decipher(l, r);
+			this.f.push(bf.fromStringCode32(e.l));
+			this.f.push(bf.fromStringCode32(e.r));
+		},
+		normalize: function(s){
+			var c = 0x00;
+			var i = s.length;
+			while (c == 0x00)
+				c = s.charCodeAt(--i);
+			if (i < s.length -1)
+				return s.substr(0, i+1);
+			return s;
+		},
+		get: function(){
+			if (bf.config.verification) {
+				var len = Math.ceil(bf.config.verification.length / 8) * 2;
+				var check = this.f.slice(0, len).join('');
+				if (this.normalize(check) !== bf.config.verification) {
+					return false;
+				}
+				this.f = this.f.slice(len);
+			}
+			return this.normalize(this.f.join(''));
+		}
 	};
-}
-Blowfish.prototype.Fbf_P=function(){return [
-	0x243f6a88,0x85a308d3,0x13198a2e,0x03707344,0xa4093822,0x299f31d0,
-	0x082efa98,0xec4e6c89,0x452821e6,0x38d01377,0xbe5466cf,0x34e90c6c,
-	0xc0ac29b7,0xc97c50dd,0x3f84d5b5,0xb5470917,0x9216d5d9,0x8979fb1b
-];};
-Blowfish.prototype.Fbf_S0=function(){return [
+};
+Blowfish.prototype.stringCode32=function(t){
+	return t.charCodeAt(0) << 24 | t.charCodeAt(1) << 16 | t.charCodeAt(2) << 8 | t.charCodeAt(3);
+};
+Blowfish.prototype.fromStringCode32=function(b){
+	return (
+		String.fromCharCode(b>>24&0xff)+
+		String.fromCharCode(b>>16&0xff)+
+		String.fromCharCode(b>>8&0xff)+
+		String.fromCharCode(b>>0&0xff)
+	);
+};
+Blowfish.prototype.encipher=function(tl,tr){
+	var t = {l:tl,r:tr};
+	for (var i=0; i<16; ++i) {
+		t.l = t.l ^ this.P[i];
+		t.r = t.r ^ (((this.SBOX1[t.l>>24&0xff]+this.SBOX2[t.l>>16&0xff])^this.SBOX3[t.l>>8&0xff])+this.SBOX4[t.l&0xff]);
+		this.swp(t);
+	}
+	t.l = t.l ^ this.P[16];
+	t.r = t.r ^ this.P[17];
+	this.swp(t);
+	return t;
+};
+Blowfish.prototype.decipher=function(tl,tr){
+	var t = {l:tl,r:tr};
+	this.swp(t);
+	t.r = t.r ^ this.P[17];
+	t.l = t.l ^ this.P[16];
+	for (var i=15; i>=0; --i) {
+		this.swp(t);
+		t.r = t.r ^ (((this.SBOX1[t.l>>24&0xff]+this.SBOX2[t.l>>16&0xff])^this.SBOX3[t.l>>8&0xff])+this.SBOX4[t.l&0xff]);
+		t.l = t.l ^ this.P[i];
+	}
+	return t;
+};
+Blowfish.prototype.swp=function(t) {
+	t.l = t.l ^ t.r;
+	t.r = t.l ^ t.r;
+	t.l = t.l ^ t.r;
+};
+Blowfish.prototype.P=function(k){
+	var P =[
+		0x243f6a88,0x85a308d3,0x13198a2e,0x03707344,0xa4093822,0x299f31d0,
+		0x082efa98,0xec4e6c89,0x452821e6,0x38d01377,0xbe5466cf,0x34e90c6c,
+		0xc0ac29b7,0xc97c50dd,0x3f84d5b5,0xb5470917,0x9216d5d9,0x8979fb1b
+	];
+	for (var i=0; i<18; ++i) {
+		P[i] = P[i] ^ (
+			(k.charCodeAt((i*4)%k.length)&0xff)<<24 |
+			(k.charCodeAt((i*4+1)%k.length)&0xff)<<16 |
+			(k.charCodeAt((i*4+2)%k.length)&0xff)<<8 |
+			(k.charCodeAt((i*4+3)%k.length)&0xff)
+		);
+	}
+	return P;
+};
+Blowfish.prototype.SBOX1=function(){return[
 	0xd1310ba6,0x98dfb5ac,0x2ffd72db,0xd01adfb7,0xb8e1afed,0x6a267e96,
 	0xba7c9045,0xf12c7f99,0x24a19947,0xb3916cf7,0x0801f2e2,0x858efc16,
 	0x636920d8,0x71574e69,0xa458fea3,0xf4933d7e,0x0d95748f,0x728eb658,
@@ -140,7 +290,7 @@ Blowfish.prototype.Fbf_S0=function(){return [
 	0xf296ec6b,0x2a0dd915,0xb6636521,0xe7b9f9b6,0xff34052e,0xc5855664,
 	0x53b02d5d,0xa99f8fa1,0x08ba4799,0x6e85076a
 ];};
-Blowfish.prototype.Fbf_S1=function(){return [
+Blowfish.prototype.SBOX2=function(){return[
 	0x4b7a70e9,0xb5b32944,0xdb75092e,0xc4192623,0xad6ea6b0,0x49a7df7d,
 	0x9cee60b8,0x8fedb266,0xecaa8c71,0x699a17ff,0x5664526c,0xc2b19ee1,
 	0x193602a5,0x75094c29,0xa0591340,0xe4183a3e,0x3f54989a,0x5b429d65,
@@ -185,7 +335,7 @@ Blowfish.prototype.Fbf_S1=function(){return [
 	0x675fda79,0xe3674340,0xc5c43465,0x713e38d8,0x3d28f89e,0xf16dff20,
 	0x153e21e7,0x8fb03d4a,0xe6e39f2b,0xdb83adf7
 ];};
-Blowfish.prototype.Fbf_S2=function(){return [
+Blowfish.prototype.SBOX3=function(){return[
 	0xe93d5a68,0x948140f7,0xf64c261c,0x94692934,0x411520f7,0x7602d4f7,
 	0xbcf46b2e,0xd4a20068,0xd4082471,0x3320f46a,0x43b7d4b7,0x500061af,
 	0x1e39f62e,0x97244546,0x14214f74,0xbf8b8840,0x4d95fc1d,0x96b591af,
@@ -230,7 +380,7 @@ Blowfish.prototype.Fbf_S2=function(){return [
 	0xa28514d9,0x6c51133c,0x6fd5c7e7,0x56e14ec4,0x362abfce,0xddc6c837,
 	0xd79a3234,0x92638212,0x670efa8e,0x406000e0
 ];};
-Blowfish.prototype.Fbf_S3=function(){return [
+Blowfish.prototype.SBOX4=function(){return[
 	0x3a39ce37,0xd3faf5cf,0xabc27737,0x5ac52d1b,0x5cb0679e,0x4fa33742,
 	0xd3822740,0x99bc9bbe,0xd5118e9d,0xbf0f7315,0xd62d1c7e,0xc700c47b,
 	0xb78c1b6b,0x21a19045,0xb26eb1be,0x6a366eb4,0x5748ab2f,0xbc946e79,
@@ -275,93 +425,3 @@ Blowfish.prototype.Fbf_S3=function(){return [
 	0x01c36ae4,0xd6ebe1f9,0x90d4f869,0xa65cdea0,0x3f09252d,0xc208e69f,
 	0xb74e6132,0xce77e25b,0x578fdfe3,0x3ac372e6
 ];};
-Blowfish.prototype.encrypt=function(t){
-	var t=this.escape(t);
-	for(var i=0,l=t.length%16;i<l;i++) t+='0';
-	var r='';
-	for(var i=0,l=t.length;i<l;i+=16){
-		this.xr_par=this.wordunescape(t.substr(i,8));
-		this.xl_par=this.wordunescape(t.substr(i+8,8));
-		this.encipher();
-		r+=this.wordescape(this.xr_par)+this.wordescape(this.xl_par);
-	}
-	return r;
-};
-Blowfish.prototype.decrypt=function(t){
-	for(var i=0,l=t.length%16;i<l;i++) t+='0';
-	var r='';
-	for (var i=0,l=t.length;i<l;i+=16){
-		this.xr_par=this.wordunescape(t.substr(i,8));
-		this.xl_par=this.wordunescape(t.substr(i+8,8));
-		this.decipher();
-		r+=this.wordescape(this.xr_par)+this.wordescape(this.xl_par);
-	}
-	return this.unescape(r).replace(/\x00+$/, '');
-};
-Blowfish.prototype.wordescape=function(w){
-	var r='';
-	// reverse byteorder for intel systems
-	var m=new Array (this.wordbyte0(w),this.wordbyte1(w),this.wordbyte2(w),this.wordbyte3(w));
-	for(var i=3;i!=-1;i--){
-		var t1=Math.floor(m[i]/16);
-		var t2=m[i]%16;
-		if (t1<10) t1+=48;
-		else t1+=55;
-		if (t2<10) t2+=48;
-		else t2+=55;
-		r+=String.fromCharCode(t1)+String.fromCharCode(t2);
-	}
-	return r;
-};
-Blowfish.prototype.wordunescape=function(t){
-	var r=0;
-	// reverse byteorder for intel systems
-	for(var i=6;i!=-2;i-=2){
-		var t1=t.charCodeAt(i);
-		var t2=t.charCodeAt(i+1);
-		if (t1<58) t1-=48;
-		else t1-=55;
-		if (t2<58) t2-=48;
-		else t2-=55;
-		r=r*256+(t1*16+t2);
-	}
-	return r;
-};
-Blowfish.prototype.round=function(a,b,n){
-	var t=this;
-	return(t.xor(a,t.xor(((t.xor((t.bf_S0[t.wordbyte0(b)]+t.bf_S1[t.wordbyte1(b)]),t.bf_S2[t.wordbyte2(b)]))+t.bf_S3[t.wordbyte3(b)]),t.bf_P[n])));
-};
-Blowfish.prototype.encipher=function(){
-	var t=this;
-	var Xl=t.xl_par;
-	var Xr=t.xr_par;
-	Xl=t.xor(Xl,t.bf_P[0]);
-	Xr=t.round(Xr,Xl,1);Xl=t.round(Xl,Xr,2);
-	Xr=t.round(Xr,Xl,3);Xl=t.round(Xl,Xr,4);
-	Xr=t.round(Xr,Xl,5);Xl=t.round(Xl,Xr,6);
-	Xr=t.round(Xr,Xl,7);Xl=t.round(Xl,Xr,8);
-	Xr=t.round(Xr,Xl,9);Xl=t.round(Xl,Xr,10);
-	Xr=t.round(Xr,Xl,11);Xl=t.round(Xl,Xr,12);
-	Xr=t.round(Xr,Xl,13);Xl=t.round(Xl,Xr,14);
-	Xr=t.round(Xr,Xl,15);Xl=t.round(Xl,Xr,16);
-	Xr=t.xor(Xr,t.bf_P[17]);
-	t.xl_par=Xr;
-	t.xr_par=Xl;
-};
-Blowfish.prototype.decipher=function(){
-	var t=this;
-	var Xl=t.xl_par;
-	var Xr=t.xr_par;
-	Xl=t.xor(Xl,t.bf_P[17]);
-	Xr=t.round(Xr,Xl,16);Xl=t.round(Xl,Xr,15);
-	Xr=t.round(Xr,Xl,14);Xl=t.round(Xl,Xr,13);
-	Xr=t.round(Xr,Xl,12);Xl=t.round(Xl,Xr,11);
-	Xr=t.round(Xr,Xl,10);Xl=t.round(Xl,Xr,9);
-	Xr=t.round(Xr,Xl,8);Xl=t.round(Xl,Xr,7);
-	Xr=t.round(Xr,Xl,6);Xl=t.round(Xl,Xr,5);
-	Xr=t.round(Xr,Xl,4);Xl=t.round(Xl,Xr,3);
-	Xr=t.round(Xr,Xl,2);Xl=t.round(Xl,Xr,1);
-	Xr=t.xor(Xr,t.bf_P[0]);
-	t.xl_par=Xr;
-	t.xr_par=Xl;
-};

@@ -61,11 +61,13 @@ $(document).ready(function () {
         } else { // Else, use blowfish encryption
 
             // Encrypt text with blowfish
-            var bf = new Blowfish(key);
-            var encrypted = bf.encrypt(text);
+            var bf = new Blowfish({
+                key: key,
+            });
+            var encrypted = bf.encrypt64(text);
 
             // Load blowfish cipher into url path and show share input
-            location.hash = 'b' + hexToBase64(encrypted);
+            location.hash = 'b' + encrypted;
             $('#share-url').val(location.href);
             $('#share').slideDown('fast');
 
@@ -99,8 +101,10 @@ $(document).ready(function () {
         
         var getHash = location.hash.substr(2); // Gets hash value after 2nd char
         var key = $('#key-decrypt').val(); // Grabs inputted key
-        var bf = new Blowfish(key); // Run blowfish against key
-        var decrypted = bf.decrypt(base64ToHex(getHash)); // Decrypted message (if key is correct)
+        var bf = new Blowfish({ // Run blowfish against key
+            key: key,
+        });
+        var decrypted = bf.decrypt64(getHash); //Decrypted message (if key is correct)
 
         $('#write-text').val(decrypted); // Output to write-text
         $('#write-text').trigger('autosize'); // Dynamically sizes the textarea
