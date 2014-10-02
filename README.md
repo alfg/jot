@@ -23,3 +23,9 @@ depending on the content.
 http://alfg.co/jot/#eTWF5IHRoZSBzb3VyY2UgYmUgd2l0aCB5b3Uu
 http://alfg.co/jot/#eVGhlIGtleSB0byBoYXBwaW5lc3M6CgoqIEVhdAoqIFNsZWVwCiogQ29kZQ==
 http://alfg.co/jot/#btU/VJBS+XgS/Qjs6YPI7lRVCUSA1E/OxMDm1z+ZC9R8 (key is foobar)
+
+### License
+
+`jot` is open-source under the [MIT License][1].
+
+[1]: http://opensource.org/licenses/MIT
