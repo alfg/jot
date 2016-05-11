@@ -3,7 +3,7 @@ Jot
 
 A server-less pastebin-esque note-taking app.
 
-**Demo**: http://alfg.github.com/jot
+**Demo**: http://alfg.github.io/jot
 
 ### Features
 * A simple, elegant design
