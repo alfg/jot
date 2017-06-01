@@ -20,9 +20,9 @@ on the content. So it is best to keep messages minimal (TODO lists, short snippe
 depending on the content.
 
 ### Examples
-http://alfg.me/jot/#eTWF5IHRoZSBzb3VyY2UgYmUgd2l0aCB5b3Uu
-http://alfg.me/jot/#eVGhlIGtleSB0byBoYXBwaW5lc3M6CgoqIEVhdAoqIFNsZWVwCiogQ29kZQ==
-http://alfg.me/jot/#btU/VJBS+XgS/Qjs6YPI7lRVCUSA1E/OxMDm1z+ZC9R8 (key is foobar)
+http://alfg.github.io/jot/#eTWF5IHRoZSBzb3VyY2UgYmUgd2l0aCB5b3Uu
+http://alfg.github.io/jot/#eVGhlIGtleSB0byBoYXBwaW5lc3M6CgoqIEVhdAoqIFNsZWVwCiogQ29kZQ==
+http://alfg.github.io/jot/#btU/VJBS+XgS/Qjs6YPI7lRVCUSA1E/OxMDm1z+ZC9R8 (key is foobar)
 
 ### License
 
